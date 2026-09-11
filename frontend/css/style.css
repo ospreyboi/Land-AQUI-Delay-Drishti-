@@ -1,0 +1,288 @@
+/* ============================================================================
+   style.css  --  Government-of-India themed styling for the dashboard.
+
+   Tailwind (loaded via CDN in each HTML page) handles layout, spacing and most
+   colours. This file only adds what Tailwind utilities don't give directly:
+   the tricolour strip, the KPI card look, the priority badge, and the state
+   popup. Keeping it small and named-by-purpose so the team can read it easily.
+   ============================================================================ */
+
+
+/* ---- Tricolour strip along the very top of every page ---- */
+.gov-tricolour {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    #ff9933 0%,   #ff9933 33.33%,   /* saffron */
+    #ffffff 33.33%, #ffffff 66.66%, /* white   */
+    #138808 66.66%, #138808 100%    /* green   */
+  );
+}
+
+
+/* ---- KPI cards (the three numbers near the top of the Overview page) ---- */
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;          /* slate-200 */
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+/* The "high-priority" card is tinted so the risk number stands out. */
+.kpi-card--alert {
+  background: #fffbeb;                /* amber-50  */
+  border-color: #fcd34d;             /* amber-300 */
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;                     /* slate-500 */
+}
+
+.kpi-value {
+  margin-top: 0.25rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;                     /* slate-900 */
+}
+
+.kpi-card--alert .kpi-value {
+  color: #b45309;                     /* amber-700 */
+}
+
+.kpi-note {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+
+/* ---- Scope toggle: "National level" / "State level" ---- */
+.scope-btn {
+  background: #ffffff;
+  color: #334155;                     /* slate-700 */
+}
+
+/* JavaScript adds this class to whichever button is currently selected. */
+.scope-btn--active {
+  background: #1e3a8a;                /* blue-900 */
+  color: #ffffff;
+}
+
+
+/* ---- Priority badge (used in the state popup's project list) ---- */
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--high {
+  background: #fee2e2;                /* red-100 */
+  color: #b91c1c;                    /* red-700 */
+}
+.badge--normal {
+  background: #f1f5f9;                /* slate-100 */
+  color: #475569;                    /* slate-600 */
+}
+
+
+/* ---- Filter row (Project List page) ---- */
+.filter-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;                     /* slate-500 */
+  margin-bottom: 0.15rem;
+}
+.filter-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;          /* slate-300 */
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.5rem;
+  background: #ffffff;
+  font-size: 0.875rem;
+}
+
+
+/* ---- Project Detail: pillar cards ---- */
+.pillar-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+.pillar-status--ok {
+  color: #15803d;                    /* green-700 */
+}
+.pillar-status--attention {
+  color: #b45309;                    /* amber-700 */
+}
+
+
+/* ---- Project Detail: stage / lifecycle tracker ---- */
+.stage-tracker {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.stage-step {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #94a3b8;                    /* slate-400 - upcoming */
+}
+.stage-step--done { color: #0f172a; }  /* slate-900 - reached */
+.stage-dot {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin: 0 auto 0.3rem;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #64748b;
+  line-height: 1.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.stage-step--done .stage-dot { background: #1e3a8a; color: #ffffff; }
+.stage-step--current .stage-dot { box-shadow: 0 0 0 3px #bfdbfe; }
+/* the connector line back to the previous step */
+.stage-step:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 0.8rem;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: #e2e8f0;
+}
+.stage-step--done:not(:first-child)::before { background: #1e3a8a; }
+.stage-name { display: block; line-height: 1.15; }
+
+
+/* ---- Logs dashboard: editable field groups ---- */
+.lg-fieldset {
+  min-width: 0;                      /* let the grid inside shrink on small screens */
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: #ffffff;
+}
+
+
+/* ---- Project Detail: SIA consultation log (quoted report excerpt) ---- */
+.sia-log {
+  white-space: pre-wrap;             /* keep the line breaks from the log text */
+  border-left: 3px solid #cbd5e1;    /* slate-300 accent */
+  padding-left: 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #334155;                    /* slate-700 */
+  max-height: 24rem;
+  overflow-y: auto;                  /* long logs scroll instead of dominating the page */
+}
+
+
+/* ---- Project Detail: "How is this calculated?" popover ---- */
+.pillar-pop {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  width: 20rem;
+  max-width: 80vw;
+  padding: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  z-index: 40;
+}
+
+
+/* ---- Profile menu (top-left of the masthead) ---- */
+.profile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #1e3a8a;                /* blue-900 */
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.profile-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  width: 17rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;          /* slate-200 */
+  border-radius: 0.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  z-index: 50;
+}
+
+.profile-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #334155;                     /* slate-700 */
+}
+.profile-menu-item:hover {
+  background: #f1f5f9;                /* slate-100 */
+}
+
+
+/* ---- Locked navigation tab (until a view is chosen on the Overview page) ---- */
+.nav-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* more specific than Tailwind's hover:bg-blue-800, so a locked tab shows no
+   hover highlight */
+nav a.nav-locked:hover {
+  background-color: transparent;
+}
+
+/* The thin hint bar under the tabs, shown only while tabs are locked. */
+.nav-gate-hint {
+  background: #eff6ff;                /* blue-50 */
+  color: #1e40af;                    /* blue-800 */
+  font-size: 0.75rem;
+}
+
+
+/* ---- State detail popup (the native <dialog> element) ---- */
+.state-dialog {
+  width: min(760px, 94vw);
+  max-height: 85vh;        /* tall content scrolls inside the popup, not the page */
+  overflow-y: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0.6rem;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+}
+
+/* The dimmed area behind the popup. */
+.state-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}

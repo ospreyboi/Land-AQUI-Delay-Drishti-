@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project List &middot; Land Acquisition Delay Risk Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- Shared shell (masthead + nav + profile) - filled by app.js -->
+  <div id="app-shell" data-active-tab="projects"></div>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- ============ State band: which view is being browsed ============ -->
+    <section class="bg-white border border-slate-200 rounded-lg px-5 py-4 flex flex-wrap items-center gap-x-5 gap-y-1">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Browsing</span>
+        <p class="text-lg font-bold text-slate-900" id="pl-scope">&mdash;</p>
+      </div>
+      <p class="text-sm text-slate-500" id="pl-scope-count"></p>
+      <a href="index.html" class="ml-auto text-sm text-blue-700 hover:underline">Change view</a>
+    </section>
+
+    <!-- ============ Filters ============ -->
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-slate-700">Find projects</h2>
+        <button id="f-clear" type="button" class="text-xs text-blue-700 hover:underline">Clear filters</button>
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <label id="f-state-wrap" class="block">
+          <span class="filter-label">State</span>
+          <select id="f-state" class="filter-input"><option value="">All states</option></select>
+        </label>
+        <label class="block">
+          <span class="filter-label">Project type</span>
+          <select id="f-type" class="filter-input"><option value="">All types</option></select>
+        </label>
+        <label class="block">
+          <span class="filter-label">District</span>
+          <select id="f-district" class="filter-input"><option value="">All districts</option></select>
+        </label>
+        <label class="block">
+          <span class="filter-label">Case ID</span>
+          <input id="f-caseid" type="text" placeholder="e.g. LA00123" autocomplete="off" class="filter-input" />
+        </label>
+        <label class="block">
+          <span class="filter-label">Stage of process</span>
+          <select id="f-stage" class="filter-input"><option value="">All stages</option></select>
+        </label>
+        <label class="block">
+          <span class="filter-label">Possession status</span>
+          <select id="f-possession" class="filter-input"><option value="">All</option></select>
+        </label>
+        <label class="block">
+          <span class="filter-label">Risk status</span>
+          <select id="f-risk" class="filter-input">
+            <option value="">All</option>
+            <option value="flagged">Flagged high-priority</option>
+            <option value="notflagged">Not flagged</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <!-- ============ Department summary (reflects the current filter) ============ -->
+    <section class="bg-white border border-slate-200 rounded-lg px-5 py-3">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+        High-priority projects by department
+      </p>
+      <p class="text-sm" id="pl-dept"></p>
+    </section>
+
+    <!-- ============ Results table (same shape as the Overview popup) ============ -->
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+      <p class="text-sm text-slate-600" id="pl-count"></p>
+      <p class="text-xs text-slate-400 mt-0.5 mb-2">
+        Sorted by model risk score, highest first. Select a row to open that project.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-slate-500">
+              <th class="font-medium py-1 pr-3">Case ID</th>
+              <th class="font-medium py-1 pr-3">District</th>
+              <th class="font-medium py-1 pr-3">Project type</th>
+              <th class="font-medium py-1 pr-3">Department</th>
+              <th class="font-medium py-1 pr-3">Stage</th>
+              <th class="font-medium py-1 pr-3">Possession</th>
+              <th class="font-medium py-1 pr-3">Priority</th>
+              <th class="font-medium py-1 text-right">Risk score</th>
+            </tr>
+          </thead>
+          <tbody id="pl-body"></tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-xs text-slate-500 border-t border-slate-200 pt-3">
+        "High priority" means the model has flagged the project as likely to be delayed, for
+        an officer to review - it is not a confirmed delay or a decision.
+      </p>
+    </section>
+
+  </main>
+
+  <div id="app-footer"></div>
+
+  <!-- app.js first (shell + gate), then the data, then this page's logic. -->
+  <script src="js/app.js"></script>
+  <script src="js/projects-data.js"></script>
+  <script src="js/projects.js"></script>
+</body>
+</html>

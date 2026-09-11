@@ -1,0 +1,16 @@
+# --- OS / disk junk (this repo lives on an exFAT external disk) ---
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+$RECYCLE.BIN/
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- future backend artifacts (rebuild with the scripts, don't commit) ---
+data/land_acquisition.db
+backend/model.pkl
