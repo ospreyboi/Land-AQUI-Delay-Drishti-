@@ -3,7 +3,7 @@
 **Predictive Analytics System for Early Detection of Land Acquisition Delays**
 Ministry of Rural Development · Dept. of Land Resources (DoLR)
 
-## One-line pitch
+## my focus
 
 An AI-powered dashboard that predicts which land acquisition projects are at risk
 of delay — and why — before the delay happens, across four causes: acquisition
@@ -11,10 +11,8 @@ process health, legal disputes, rehabilitation readiness, and administrative
 efficiency.
 
 ## Status
+still a beta version, more technology changes and architectural changes underway.
 
-**Beta build for SIH internal round.** Submission deadline: 10 Sept. Hackathon: 12 Sept.
-This is a working proof-of-concept, not a production system. Later rounds will
-extend and harden this beta — do not assume this is the final scope.
 
 ## Tech stack
 
@@ -27,9 +25,6 @@ extend and harden this beta — do not assume this is the final scope.
 | Frontend → Backend | `fetch()` calls to FastAPI endpoints |
 | Charts | Chart.js (via CDN) or plain CSS bars |
 
-No build tools, no Node.js, no React. Everything runs by opening HTML files in a
-browser and running one Python server. This is deliberate — the team is
-beginner-level and needs to be able to read, debug, and explain every line.
 
 ## Repo structure
 
