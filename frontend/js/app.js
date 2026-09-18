@@ -1,5 +1,6 @@
 /*
- * app.js  --  shared "app shell", loaded first on every page.
+ * app.js  --  shared "app shell". Loaded right after js/i18n.js on every page
+ * (it calls I18N.t() while building the shell, so i18n.js must load first).
  *
  * Jobs:
  *   1. SHELL      - draws the tricolour strip + masthead + profile menu + tab
@@ -30,12 +31,11 @@ window.LaquiApp = (function () {
   // Tabs locked until BOTH a sign-in and a scope exist. Matched by href.
   var GATED_TAB_HREFS = ["projects.html", "project-detail.html"];
 
-  // Role key -> human label. The three dashboards the team is planning.
-  var ROLE_LABELS = {
-    viewing: "Risk-viewing dashboard",
-    logs: "Logs dashboard",
-    admin: "Administrative dashboard"
-  };
+  // Role key -> i18n key. The three dashboards the team is planning.
+  var ROLE_KEYS = { viewing: "role.viewing", logs: "role.logs", admin: "role.admin" };
+  function roleLabel(role) {
+    return ROLE_KEYS[role] ? I18N.t(ROLE_KEYS[role]) : role;
+  }
 
 
   /* ======================================================================
@@ -79,6 +79,7 @@ window.LaquiApp = (function () {
   // The profile button + dropdown. Wired up by wireProfileMenu(); its contents
   // (signed-in name/role, or a "Log in" link) are filled in by renderIdentity().
   function profileMenuHtml() {
+    var lang = I18N.getLanguage();
     return '' +
       '<div class="relative shrink-0">' +
         '<button id="profile-button" type="button" aria-haspopup="true" aria-expanded="false" ' +
@@ -87,23 +88,23 @@ window.LaquiApp = (function () {
           '<svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
             '<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />' +
           '</svg>' +
-          '<span class="sr-only">Open account menu</span>' +
+          '<span class="sr-only">' + I18N.t("nav.openAccountMenu") + '</span>' +
         '</button>' +
         '<div id="profile-menu" class="profile-menu hidden">' +
           '<div class="px-4 py-3 border-b border-slate-200">' +
-            '<p id="profile-name" class="text-sm font-semibold text-slate-900">Not signed in</p>' +
+            '<p id="profile-name" class="text-sm font-semibold text-slate-900">' + I18N.t("account.notSignedIn") + '</p>' +
             '<p id="profile-role" class="text-xs text-slate-500"></p>' +
           '</div>' +
           '<div class="py-1">' +
-            '<a id="profile-login-link" href="login.html" class="profile-menu-item">Sign in</a>' +
-            '<button id="profile-settings-toggle" type="button" class="profile-menu-item">Settings</button>' +
+            '<a id="profile-login-link" href="login.html" class="profile-menu-item">' + I18N.t("account.signIn") + '</a>' +
+            '<button id="profile-settings-toggle" type="button" class="profile-menu-item">' + I18N.t("account.settings") + '</button>' +
             '<div id="profile-settings" class="hidden px-4 py-3 bg-slate-50 border-y border-slate-200 text-sm">' +
-              '<p class="text-xs font-medium text-slate-600 mb-1">Language</p>' +
-              '<label class="flex items-center gap-2 py-0.5"><input type="radio" name="app-language" value="en" checked /><span>English</span></label>' +
-              '<label class="flex items-center gap-2 py-0.5 text-slate-400"><input type="radio" name="app-language" value="hi" disabled /><span>हिन्दी (Hindi)</span></label>' +
-              '<p class="text-[11px] text-slate-400 mt-1">Hindi is planned for a later round - the translation layer isn\'t built yet.</p>' +
+              '<p class="text-xs font-medium text-slate-600 mb-1">' + I18N.t("account.language") + '</p>' +
+              '<label class="flex items-center gap-2 py-0.5"><input type="radio" name="app-language" value="en"' + (lang === "en" ? " checked" : "") + ' /><span>English</span></label>' +
+              '<label class="flex items-center gap-2 py-0.5"><input type="radio" name="app-language" value="hi"' + (lang === "hi" ? " checked" : "") + ' /><span>हिन्दी (Hindi)</span></label>' +
+              '<p class="text-[11px] text-slate-400 mt-1">' + I18N.t("account.hindiNote") + '</p>' +
             '</div>' +
-            '<button id="profile-logout" type="button" class="profile-menu-item hidden">Log out</button>' +
+            '<button id="profile-logout" type="button" class="profile-menu-item hidden">' + I18N.t("account.logout") + '</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -143,25 +144,25 @@ window.LaquiApp = (function () {
           profileMenuHtml() +
           emblemSvgHtml() +
           '<div class="leading-tight">' +
-            '<p class="text-[11px] uppercase tracking-wide text-slate-500">Government of India</p>' +
-            '<p class="text-sm font-semibold text-slate-900">Ministry of Rural Development</p>' +
-            '<p class="text-xs text-slate-600">Department of Land Resources (DoLR)</p>' +
+            '<p class="text-[11px] uppercase tracking-wide text-slate-500">' + I18N.t("shell.govOfIndia") + '</p>' +
+            '<p class="text-sm font-semibold text-slate-900">' + I18N.t("shell.ministry") + '</p>' +
+            '<p class="text-xs text-slate-600">' + I18N.t("shell.department") + '</p>' +
           '</div>' +
           '<div class="ml-auto text-right">' +
-            '<p class="text-sm font-semibold text-blue-900">Land Acquisition Delay Risk Dashboard</p>' +
-            '<p class="text-[11px] text-slate-500">Problem statement SIH26017 &middot; Beta build</p>' +
+            '<p class="text-sm font-semibold text-blue-900">' + I18N.t("shell.dashboardTitle") + '</p>' +
+            '<p class="text-[11px] text-slate-500">' + I18N.t("shell.problemStatement") + '</p>' +
           '</div>' +
         '</div>' +
       '</header>' +
       '<nav class="bg-blue-900 text-white">' +
         '<div class="max-w-6xl mx-auto px-4 flex flex-wrap text-sm">' +
-          navTabHtml("index.html", "Overview", "overview", active, false) +
-          navTabHtml("projects.html", "Project List", "projects", active, true) +
-          navTabHtml("project-detail.html", "Project Detail", "detail", active, true) +
-          navTabHtml("analytics.html", "District / State Analytics", "analytics", active, false) +
+          navTabHtml("index.html", I18N.t("nav.overview"), "overview", active, false) +
+          navTabHtml("projects.html", I18N.t("nav.projects"), "projects", active, true) +
+          navTabHtml("project-detail.html", I18N.t("nav.detail"), "detail", active, true) +
+          navTabHtml("analytics.html", I18N.t("nav.analytics"), "analytics", active, false) +
           // Data-entry tab only for the "logs" role.
           (session && session.role === "logs"
-            ? navTabHtml("logs.html", "Data Entry", "logs", active, false)
+            ? navTabHtml("logs.html", I18N.t("nav.logs"), "logs", active, false)
             : "") +
         '</div>' +
       '</nav>' +
@@ -181,10 +182,8 @@ window.LaquiApp = (function () {
     mount.innerHTML = '' +
       '<footer class="border-t border-slate-200 bg-white mt-10">' +
         '<div class="max-w-6xl mx-auto px-4 py-4 text-xs text-slate-500 space-y-1">' +
-          '<p><strong>Beta / proof-of-concept.</strong> Built for the SIH internal round. Not a production system.</p>' +
-          '<p>Data shown is <strong>synthetic</strong>, calibrated to real published patterns ' +
-          '(NJDG delay reasons, DoLR / LACRRIS structure, DILRMP digitisation rates). ' +
-          'It does not contain real case records.</p>' +
+          '<p>' + I18N.t("footer.beta") + '</p>' +
+          '<p>' + I18N.t("footer.synthetic") + '</p>' +
         '</div>' +
       '</footer>';
   }
@@ -206,13 +205,14 @@ window.LaquiApp = (function () {
     applyNavGate();
   }
 
-  // A short label for the current scope, e.g. "Punjab" or "All of India".
+  // A short, TRANSLATED label for the current scope, e.g. "Punjab" / "पंजाब"
+  // or "All of India" / "संपूर्ण भारत".
   function scopeLabel(scope) {
     if (scope && scope.level === "state") {
-      return scope.state;
+      return I18N.tv(scope.state);
     }
     if (scope && scope.level === "national") {
-      return "All of India";
+      return I18N.t("overview.allIndia");
     }
     return "";
   }
@@ -255,11 +255,10 @@ window.LaquiApp = (function () {
     if (hint && hintText) {
       hint.classList.toggle("hidden", open);
       if (!signedIn) {
-        hintText.innerHTML = '<a href="login.html" class="underline font-semibold">Sign in</a> ' +
-          'and choose a view to open the <em>Project List</em> and <em>Project Detail</em> tabs.';
+        var signInLink = '<a href="login.html" class="underline font-semibold">' + I18N.t("nav.gate.signIn") + '</a>';
+        hintText.innerHTML = I18N.t("nav.gate.needLogin", { signIn: signInLink });
       } else if (!hasScope) {
-        hintText.innerHTML = 'Choose <strong>National level</strong> or a <strong>State</strong> below ' +
-          'to open the <em>Project List</em> and <em>Project Detail</em> tabs.';
+        hintText.innerHTML = I18N.t("nav.gate.needScope");
       }
     }
   }
@@ -295,7 +294,7 @@ window.LaquiApp = (function () {
   // Called by login.js after the form is submitted.
   function signIn(session) {
     var role = session.role || "viewing";
-    if (!ROLE_LABELS.hasOwnProperty(role)) {
+    if (!ROLE_KEYS.hasOwnProperty(role)) {
       role = "viewing";
     }
     writeJson(window.sessionStorage, SESSION_KEY, {
@@ -352,13 +351,13 @@ window.LaquiApp = (function () {
 
     if (session) {
       if (avatar) avatar.textContent = initialsOf(session.name) || "•";
-      nameEl.textContent = session.name || "Signed in";
-      roleEl.textContent = ROLE_LABELS[session.role] || session.role;
+      nameEl.textContent = session.name || I18N.t("account.signedIn");
+      roleEl.textContent = roleLabel(session.role);
       loginLink.classList.add("hidden");
       logoutBtn.classList.remove("hidden");
     } else {
       if (avatar) avatar.textContent = "•";
-      nameEl.textContent = "Not signed in";
+      nameEl.textContent = I18N.t("account.notSignedIn");
       roleEl.textContent = "";
       loginLink.classList.remove("hidden");
       logoutBtn.classList.add("hidden");
@@ -407,6 +406,21 @@ window.LaquiApp = (function () {
       settings.classList.toggle("hidden");
     });
 
+    // Switching language re-renders the whole page in the new language - the
+    // simplest correct way to update everything, since most of the dashboard's
+    // text is built once, at page load, by half a dozen different scripts.
+    Array.prototype.forEach.call(
+      document.querySelectorAll('input[name="app-language"]'),
+      function (radio) {
+        radio.addEventListener("change", function () {
+          if (this.checked) {
+            I18N.setLanguage(this.value);
+            window.location.reload();
+          }
+        });
+      }
+    );
+
     document.getElementById("profile-logout").addEventListener("click", logout);
   }
 
@@ -417,11 +431,15 @@ window.LaquiApp = (function () {
      ====================================================================== */
 
   function boot() {
-    renderShell();        // 1. draw the chrome (masthead + nav)
+    renderShell();         // 1. draw the chrome (masthead + nav)
     renderFooter();        // 2. draw the shared footer
     wireNavGate();         // 3. lock/unlock tabs + block locked clicks
     wireProfileMenu();     // 4. make the account menu interactive
     renderIdentity();      // 5. fill in the signed-in name / role (or "Sign in")
+    I18N.applyStatic();    // 6. translate every [data-i18n] element on the page -
+                           //    the shell/footer just built above, AND this
+                           //    page's own static markup (already in the DOM,
+                           //    since this script runs at the end of <body>)
   }
 
   if (document.readyState === "loading") {
@@ -436,7 +454,7 @@ window.LaquiApp = (function () {
     signIn: signIn,
     logout: logout,
     requireLogin: requireLogin,
-    roleLabel: function (role) { return ROLE_LABELS[role] || role; },
+    roleLabel: roleLabel,
     // scope
     getScope: getScope,
     setScope: setScope,

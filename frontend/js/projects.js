@@ -65,14 +65,14 @@
   //                     -> "Punjab / District 2"  (national scope, so it's unambiguous)
   function districtLabel(fullName) {
     var parts = fullName.split("_");            // ["Punjab", "District", "2"]
-    var shortName = parts.slice(1).join(" ");   // "District 2"
-    return isNational ? parts[0] + " / " + shortName : shortName;
+    var shortName = I18N.t("table.district") + " " + parts[2];   // "District 2"
+    return isNational ? I18N.tv(parts[0]) + " / " + shortName : shortName;
   }
 
   function priorityBadge(project) {
     return project.delayed
-      ? '<span class="badge badge--high">High priority</span>'
-      : '<span class="badge badge--normal">Standard</span>';
+      ? '<span class="badge badge--high">' + I18N.t("badge.highPriority") + '</span>'
+      : '<span class="badge badge--normal">' + I18N.t("badge.standard") + '</span>';
   }
 
   // Refill the district dropdown for a given state ("" = every district in scope).
@@ -133,12 +133,12 @@
 
     var box = el("pl-dept");
     if (rows.length === 0) {
-      box.innerHTML = '<span class="text-slate-400">No high-priority projects match the current filters.</span>';
+      box.innerHTML = '<span class="text-slate-400">' + I18N.t("projects.noneMatch") + '</span>';
       return;
     }
     box.innerHTML = rows.map(function (r) {
       return '<span class="inline-block mr-4 mb-1">' +
-               '<span class="font-medium">' + r.dept + '</span> ' +
+               '<span class="font-medium">' + I18N.tv(r.dept) + '</span> ' +
                '<span class="text-slate-500">' + r.n + '</span>' +
              '</span>';
     }).join("");
@@ -159,10 +159,10 @@
         '<td class="py-1.5 pr-3 font-mono text-xs">' +
           '<a href="' + url + '" class="text-blue-700 hover:underline">' + p.case_id + '</a></td>' +
         '<td class="py-1.5 pr-3">' + districtLabel(p.district) + '</td>' +
-        '<td class="py-1.5 pr-3">' + p.project_type + '</td>' +
-        '<td class="py-1.5 pr-3">' + p.acquiring_authority + '</td>' +
-        '<td class="py-1.5 pr-3">' + p.stage_of_process + '</td>' +
-        '<td class="py-1.5 pr-3">' + p.possession_status + '</td>' +
+        '<td class="py-1.5 pr-3">' + I18N.tv(p.project_type) + '</td>' +
+        '<td class="py-1.5 pr-3">' + I18N.tv(p.acquiring_authority) + '</td>' +
+        '<td class="py-1.5 pr-3">' + I18N.tv(p.stage_of_process) + '</td>' +
+        '<td class="py-1.5 pr-3">' + I18N.tv(p.possession_status) + '</td>' +
         '<td class="py-1.5 pr-3">' + priorityBadge(p) + '</td>' +
         '<td class="py-1.5 text-right tabular-nums">' + p.risk_score.toFixed(2) + '</td>';
       body.appendChild(tr);
@@ -170,21 +170,21 @@
 
     var total = results.length;
     el("pl-count").textContent = (total > MAX_ROWS)
-      ? "Showing the top " + MAX_ROWS + " of " + total.toLocaleString("en-IN") +
-        " matching projects. Add filters to narrow the list."
-      : "Showing " + total.toLocaleString("en-IN") + " matching project" + (total === 1 ? "" : "s") + ".";
+      ? I18N.t("projects.showingTop", { max: MAX_ROWS, total: total.toLocaleString("en-IN") })
+      : I18N.t("projects.showingAll", { n: total.toLocaleString("en-IN"), s: (total === 1 ? "" : "s") });
   }
 
 
   /* ---- set-up (runs now - this script is at the end of <body>) ---- */
 
   el("pl-scope").textContent = LaquiApp.scopeLabel(scope);
-  el("pl-scope-count").textContent =
-    scopeProjects.length.toLocaleString("en-IN") + " projects on record";
+  el("pl-scope-count").textContent = I18N.t("projects.projectsOnRecord", {
+    n: scopeProjects.length.toLocaleString("en-IN")
+  });
 
   if (isNational) {
     var states = Array.from(new Set(PROJECTS.map(function (p) { return p.state; }))).sort();
-    fillSelect("f-state", states);
+    fillSelect("f-state", states, I18N.tv);
     el("f-state").addEventListener("change", function () {
       fillDistrictOptions(value("f-state"));   // district options follow the state
       render();
@@ -193,9 +193,9 @@
     el("f-state-wrap").classList.add("hidden");   // one state only - no state filter
   }
 
-  fillSelect("f-type", PROJECT_TYPES);
-  fillSelect("f-stage", STAGES);
-  fillSelect("f-possession", POSSESSION_STATUSES);
+  fillSelect("f-type", PROJECT_TYPES, I18N.tv);
+  fillSelect("f-stage", STAGES, I18N.tv);
+  fillSelect("f-possession", POSSESSION_STATUSES, I18N.tv);
   fillDistrictOptions(isNational ? "" : scope.state);
 
   ["f-type", "f-district", "f-stage", "f-possession", "f-risk"].forEach(function (id) {

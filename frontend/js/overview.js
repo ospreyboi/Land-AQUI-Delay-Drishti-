@@ -51,7 +51,7 @@ function formatNumber(value) {
 // badge is always "High". Kept as a function so more levels can be added later
 // without hunting through the code.
 function priorityBadgeHtml() {
-  return '<span class="badge badge--high">High priority</span>';
+  return '<span class="badge badge--high">' + I18N.t("badge.highPriority") + '</span>';
 }
 
 
@@ -65,15 +65,16 @@ function renderKpis(figures, viewLabel) {
   document.getElementById("kpi-total").textContent = formatNumber(figures.total_cases);
   document.getElementById("kpi-highpri").textContent = formatNumber(figures.high_priority_cases);
   document.getElementById("kpi-legal").textContent = formatNumber(figures.legal_cases_pending);
-  document.querySelector("#scope-label span").textContent = viewLabel;
+  document.getElementById("scope-label-value").textContent = viewLabel;
 }
 
 // Fill in the state popup for one state and open it.
 function showStatePopup(stateName, stateData) {
-  document.getElementById("sd-state").textContent = stateName;
-  document.getElementById("sd-summary").textContent =
-    formatNumber(stateData.high_priority_cases) + " high-priority cases flagged for review  ·  " +
-    formatNumber(stateData.legal_cases_pending) + " legal cases pending";
+  document.getElementById("sd-state").textContent = I18N.tv(stateName);
+  document.getElementById("sd-summary").textContent = I18N.t("overview.popup.summary", {
+    highpri: formatNumber(stateData.high_priority_cases),
+    legal: formatNumber(stateData.legal_cases_pending)
+  });
 
   // --- table 1: high-priority cases by department ---
   var deptBody = document.getElementById("sd-dept-body");
@@ -82,7 +83,7 @@ function showStatePopup(stateName, stateData) {
     var tr = document.createElement("tr");
     tr.className = "border-t border-slate-100";
     tr.innerHTML =
-      '<td class="py-1.5 pr-2">' + row.department + "</td>" +
+      '<td class="py-1.5 pr-2">' + I18N.tv(row.department) + "</td>" +
       '<td class="py-1.5 text-right font-medium">' + formatNumber(row.high_priority_count) + "</td>";
     deptBody.appendChild(tr);
   });
@@ -95,7 +96,8 @@ function showStatePopup(stateName, stateData) {
   stateData.flagged_projects_top.forEach(function (project) {
     // The district values look like "Maharashtra_District_2". We're already
     // inside the Maharashtra popup, so drop the repeated state name.
-    var shortDistrict = project.district.replace(stateName + "_", "").replace(/_/g, " ");
+    var shortDistrict = project.district.replace(stateName + "_", "")
+      .replace(/^District/, I18N.t("table.district")).replace(/_/g, " ");
     var detailUrl = "project-detail.html?case_id=" + encodeURIComponent(project.case_id) +
                     "&state=" + encodeURIComponent(stateName);
 
@@ -108,16 +110,17 @@ function showStatePopup(stateName, stateData) {
       '<td class="py-1.5 pr-3 font-mono text-xs">' +
         '<a href="' + detailUrl + '" class="text-blue-700 hover:underline">' + project.case_id + "</a></td>" +
       '<td class="py-1.5 pr-3">' + shortDistrict + "</td>" +
-      '<td class="py-1.5 pr-3">' + project.project_type + "</td>" +
-      '<td class="py-1.5 pr-3">' + project.department + "</td>" +
+      '<td class="py-1.5 pr-3">' + I18N.tv(project.project_type) + "</td>" +
+      '<td class="py-1.5 pr-3">' + I18N.tv(project.department) + "</td>" +
       '<td class="py-1.5 pr-3">' + priorityBadgeHtml() + "</td>" +
       '<td class="py-1.5 text-right tabular-nums">' + project.risk_score.toFixed(2) + "</td>";
     projBody.appendChild(tr);
   });
 
-  document.getElementById("sd-proj-count").textContent =
-    "(showing top " + stateData.flagged_projects_top.length +
-    " of " + formatNumber(stateData.flagged_projects_total) + ")";
+  document.getElementById("sd-proj-count").textContent = I18N.t("overview.popup.showingTop", {
+    shown: stateData.flagged_projects_top.length,
+    total: formatNumber(stateData.flagged_projects_total)
+  });
 
   document.getElementById("state-dialog").showModal();
 }
@@ -136,14 +139,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // view (National level, or a State) before the Project List / Project
     // Detail tabs unlock - see app.js. So we do NOT call LaquiApp.setScope()
     // here; that happens only on a real click below.
-    renderKpis(overview.national, "All of India (preview)");
+    renderKpis(overview.national, I18N.t("overview.allIndiaPreview"));
 
     // ---- fill the state dropdown from whatever states the data contains ----
     var picker = document.getElementById("state-picker");
     Object.keys(overview.states).sort().forEach(function (stateName) {
       var option = document.createElement("option");
-      option.value = stateName;
-      option.textContent = stateName;
+      option.value = stateName;              // the value stays English - it's a data key
+      option.textContent = I18N.tv(stateName);  // only the displayed text is translated
       picker.appendChild(option);
     });
 
@@ -163,12 +166,12 @@ document.addEventListener("DOMContentLoaded", function () {
     var savedScope = LaquiApp.getScope();
     if (savedScope && savedScope.level === "national") {
       setActiveScope("national");
-      renderKpis(overview.national, "All of India");
+      renderKpis(overview.national, I18N.t("overview.allIndia"));
     } else if (savedScope && savedScope.level === "state" && overview.states[savedScope.state]) {
       setActiveScope("state");
       pickerWrap.classList.remove("hidden");
       picker.value = savedScope.state;
-      renderKpis(overview.states[savedScope.state], savedScope.state);
+      renderKpis(overview.states[savedScope.state], I18N.tv(savedScope.state));
     }
 
     // ---- "National level": show all-India figures + unlock the gated tabs ----
@@ -176,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
       setActiveScope("national");
       pickerWrap.classList.add("hidden");
       picker.value = "";
-      renderKpis(overview.national, "All of India");
+      renderKpis(overview.national, I18N.t("overview.allIndia"));
       LaquiApp.setScope({ level: "national" });   // <- unlocks Project List / Detail
     });
 
@@ -199,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
       LaquiApp.setScope({ level: "state", state: stateName });   // set scope FIRST,
                                                                  // so the popup's row
                                                                  // links work right away
-      renderKpis(stateData, stateName);
+      renderKpis(stateData, I18N.tv(stateName));
       showStatePopup(stateName, stateData);
     });
 

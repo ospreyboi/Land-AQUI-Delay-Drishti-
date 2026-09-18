@@ -41,7 +41,7 @@
     var error = document.getElementById("login-error");
 
     if (name.length < 2) {
-      error.textContent = "Please enter your name to continue.";
+      error.textContent = I18N.t("login.enterName");
       error.classList.remove("hidden");
       return;
     }

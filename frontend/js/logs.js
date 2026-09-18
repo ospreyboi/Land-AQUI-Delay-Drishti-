@@ -54,17 +54,26 @@
   /* ---- rebuild the dropdown (shipped + any new projects) ---- */
 
   function fillPicker(selected) {
-    picker.innerHTML = '<option value="">— Select a project —</option>' +
-                       '<option value="__new__">+ New project</option>';
+    picker.innerHTML =
+      '<option value="">' + I18N.t("logs.selectProject") + '</option>' +
+      '<option value="__new__">' + I18N.t("logs.newProject") + '</option>';
     ProjectOverrides.newList().sort(function (a, b) {
       return a.case_id < b.case_id ? -1 : 1;
     }).forEach(function (p) {
-      picker.appendChild(makeOption(p.case_id, p.case_id + " — " + (p.project_name || "(unnamed)") + "  [new]"));
+      picker.appendChild(makeOption(p.case_id,
+        p.case_id + " — " + (p.project_name || I18N.t("logs.unnamed")) + "  " + I18N.t("logs.newTag")));
     });
     Object.keys(byId).sort().forEach(function (id) {
-      picker.appendChild(makeOption(id, id + " — " + byId[id].project_type + ", " + byId[id].district));
+      picker.appendChild(makeOption(id,
+        id + " — " + I18N.tv(byId[id].project_type) + ", " + shortDistrict(byId[id].district)));
     });
     if (selected) { picker.value = selected; }
+  }
+
+  // "Punjab_District_2" -> "District 2" (the picker only needs the short form).
+  function shortDistrict(d) {
+    var parts = d.split("_");
+    return parts.length === 3 ? I18N.t("table.district") + " " + parts[2] : d;
   }
   function makeOption(value, text) {
     var o = document.createElement("option");
@@ -79,19 +88,20 @@
     var v = (value === undefined || value === null) ? "" : value;
 
     if (readOnly) {
-      return '<div class="filter-input bg-slate-100 text-slate-500">' + (v === "" ? "—" : v) + '</div>';
+      var shown = v === "" ? I18N.t("logs.readonlyEmpty") : I18N.tv(v);
+      return '<div class="filter-input bg-slate-100 text-slate-500">' + shown + '</div>';
     }
     if (S.enums[key]) {
       return '<select name="' + key + '" class="filter-input">' +
-        (S.enums[key].indexOf(v) === -1 ? '<option value="">— select —</option>' : '') +
+        (S.enums[key].indexOf(v) === -1 ? '<option value="">' + I18N.t("logs.selectPlaceholder") + '</option>' : '') +
         S.enums[key].map(function (o) {
-          return '<option' + (o === v ? ' selected' : '') + '>' + o + '</option>';
+          return '<option value="' + o + '"' + (o === v ? ' selected' : '') + '>' + I18N.tv(o) + '</option>';
         }).join("") + '</select>';
     }
     if (S.booleanKeys.indexOf(key) !== -1) {
       return '<select name="' + key + '" class="filter-input">' +
-        '<option value="true"' + (v === true ? ' selected' : '') + '>Yes</option>' +
-        '<option value="false"' + (v === true ? '' : ' selected') + '>No</option>' +
+        '<option value="true"' + (v === true ? ' selected' : '') + '>' + I18N.t("yesNo.yes") + '</option>' +
+        '<option value="false"' + (v === true ? '' : ' selected') + '>' + I18N.t("yesNo.no") + '</option>' +
         '</select>';
     }
     if (S.textKeys.indexOf(key) !== -1) {
@@ -119,14 +129,14 @@
       return titles.indexOf(g.title) !== -1;
     }).map(function (g) {
       return '<fieldset class="lg-fieldset">' +
-        '<legend class="text-xs font-semibold uppercase tracking-wide text-slate-500 px-1">' + g.title + '</legend>' +
+        '<legend class="text-xs font-semibold uppercase tracking-wide text-slate-500 px-1">' + I18N.groupTitle(g.title) + '</legend>' +
         '<div class="grid gap-3 sm:grid-cols-2">' +
           g.keys.map(function (k) {
             // case_id is always read-only; identity fields are read-only when
             // editing a shipped project.
             var readOnly = (k === "case_id") ||
                            (!editableIdentity && S.identityKeys.indexOf(k) !== -1);
-            return '<label class="block"><span class="filter-label">' + S.labels[k] + '</span>' +
+            return '<label class="block"><span class="filter-label">' + I18N.fieldLabel(k) + '</span>' +
                    inputFor(k, project[k], readOnly) + '</label>';
           }).join("") +
         '</div></fieldset>';
@@ -142,8 +152,8 @@
     mode = "new";
     currentId = nextCaseId();
     renderForm({ case_id: currentId }, true);
-    el("lg-heading").textContent = "New project";
-    el("lg-updated").textContent = "Project number " + currentId + " will be assigned on save.";
+    el("lg-heading").textContent = I18N.t("logs.heading.new");
+    el("lg-updated").textContent = I18N.t("logs.numberAssignedOnSave", { id: currentId });
     el("lg-status").textContent = "";
   }
 
@@ -159,12 +169,13 @@
     currentId = id;
     renderForm(project, !shipped);   // identity editable only for non-shipped projects
 
-    el("lg-heading").textContent = "Editing " + id +
-      (shipped ? "" : " (" + (project.project_name || "unnamed") + ", created here)");
+    el("lg-heading").textContent = shipped
+      ? I18N.t("logs.heading.editing", { id: id })
+      : I18N.t("logs.heading.editingNew", { id: id, name: project.project_name || I18N.t("logs.unnamed") });
     var o = ProjectOverrides.get(id);
     el("lg-updated").textContent = o
-      ? "Last saved " + new Date(o._updated_at).toLocaleString("en-IN")
-      : "No local edits yet - values shown as shipped.";
+      ? I18N.t("logs.lastSaved", { date: new Date(o._updated_at).toLocaleString("en-IN") })
+      : I18N.t("logs.noEditsYet");
     el("lg-status").textContent = "";
   }
 
@@ -197,7 +208,7 @@
     if (wasNew) {
       if (!fields.project_name) {
         el("lg-status").className = "text-sm text-red-700";
-        el("lg-status").textContent = "Enter a project name before saving.";
+        el("lg-status").textContent = I18N.t("logs.enterNameFirst");
         return;
       }
       fields._new = true;
@@ -208,8 +219,8 @@
     fillPicker(savedId);
     beginEdit(savedId);   // continue in edit mode on the same project
     el("lg-status").className = "text-sm text-green-700";
-    el("lg-status").innerHTML = (wasNew ? "Created " : "Saved ") + savedId + ". " +
-      '<a class="underline" href="project-detail.html?case_id=' + savedId + '">Open in the viewing dashboard</a>';
+    el("lg-status").innerHTML = I18N.t(wasNew ? "logs.created" : "logs.saved", { id: savedId }) +
+      '<a class="underline" href="project-detail.html?case_id=' + savedId + '">' + I18N.t("logs.openInViewing") + '</a>';
   });
 
 
@@ -223,13 +234,13 @@
       fillPicker("");
       formBox.innerHTML = "";
       actions.hidden = true;
-      el("lg-heading").textContent = "Project data entry";
+      el("lg-heading").textContent = I18N.t("logs.heading.default");
       el("lg-updated").textContent = "";
-      el("lg-status").textContent = "New project discarded.";
+      el("lg-status").textContent = I18N.t("logs.newDiscarded");
       mode = null; currentId = null;
     } else {
       beginEdit(currentId);
-      el("lg-status").textContent = "Local edits discarded.";
+      el("lg-status").textContent = I18N.t("logs.editsDiscarded");
     }
   });
 

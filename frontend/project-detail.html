@@ -20,7 +20,7 @@
     <section id="pd-message" class="hidden bg-white border border-slate-200 rounded-lg p-6">
       <h1 id="pd-message-title" class="text-lg font-bold text-slate-900"></h1>
       <p id="pd-message-body" class="text-sm text-slate-600 mt-1"></p>
-      <a href="projects.html" class="inline-block mt-3 text-sm text-blue-700 hover:underline">Go to Project List</a>
+      <a href="projects.html" class="inline-block mt-3 text-sm text-blue-700 hover:underline" data-i18n="detail.goToList">Go to Project List</a>
     </section>
 
     <!-- The project detail, hidden until a matching project is loaded -->
@@ -30,17 +30,17 @@
       <section class="bg-white border border-slate-200 rounded-lg px-5 py-4">
         <div class="flex flex-wrap items-start gap-x-8 gap-y-3">
           <div>
-            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Project</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500" data-i18n="detail.project">Project</span>
             <p class="text-lg font-bold text-slate-900" id="pd-caseid"></p>
           </div>
           <div class="grid grid-cols-2 gap-x-8 gap-y-1 text-sm" id="pd-header-facts"></div>
-          <a href="projects.html" id="pd-back" class="ml-auto text-sm text-blue-700 hover:underline">Back to Project List</a>
+          <a href="projects.html" id="pd-back" class="ml-auto text-sm text-blue-700 hover:underline" data-i18n="detail.backToList">Back to Project List</a>
         </div>
       </section>
 
       <!-- ===== Stage / lifecycle tracker (feature 2) ===== -->
       <section class="bg-white border border-slate-200 rounded-lg px-5 py-4">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Acquisition lifecycle stage</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3" data-i18n="detail.lifecycleStage">Acquisition lifecycle stage</p>
         <ol class="stage-tracker" id="pd-stage-steps"></ol>
       </section>
 
@@ -48,19 +48,20 @@
       <section class="bg-white border border-slate-200 rounded-lg p-5">
         <div class="flex flex-wrap gap-8 items-center">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Model delay-risk score</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" data-i18n="detail.riskScoreLabel">Model delay-risk score</p>
             <p class="text-4xl font-bold text-slate-900 tabular-nums" id="pd-risk-score"></p>
-            <p class="text-xs text-slate-400">on a 0.00 &ndash; 1.00 scale</p>
+            <p class="text-xs text-slate-400" data-i18n="detail.riskScoreScale">on a 0.00 &ndash; 1.00 scale</p>
 
             <!-- feature 3: pillar sub-score breakdown -->
             <div class="relative mt-1">
               <button id="pd-pillar-info" type="button"
                       class="text-xs text-blue-700 hover:underline"
+                      data-i18n="detail.howCalculated" data-i18n-aria="detail.howCalculated"
                       aria-label="How is this score calculated?">How is this calculated?</button>
               <div id="pd-pillar-pop" class="pillar-pop hidden">
-                <p class="text-xs font-semibold text-slate-700">Score breakdown by pillar (rough)</p>
+                <p class="text-xs font-semibold text-slate-700" data-i18n="detail.pillarPopTitle">Score breakdown by pillar (rough)</p>
                 <div id="pd-pillar-bars" class="mt-1"></div>
-                <p class="mt-2 text-[11px] text-slate-400">
+                <p class="mt-2 text-[11px] text-slate-400" data-i18n="detail.pillarPopNote">
                   A rough split of the model's weighted factors into the four pillars, each scaled
                   0&ndash;1. It leaves out factors that don't belong to a single pillar, so the four
                   do not sum to the total. Context for review &ndash; not a separate decision.
@@ -76,7 +77,7 @@
             <p class="text-xs text-slate-500 mt-0.5" id="pd-risk-duration"></p>
           </div>
         </div>
-        <div class="mt-4 rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900">
+        <div class="mt-4 rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900" data-i18n-html="detail.forOfficerReviewNotice">
           <strong>For officer review.</strong> This score and the points below are model
           estimates to help prioritise attention. They are not a decision, not a finding, and
           not a substitute for field verification and due process.
@@ -85,8 +86,8 @@
 
       <!-- ===== Key drivers + recommended actions ===== -->
       <section class="bg-white border border-slate-200 rounded-lg p-5">
-        <h2 class="text-sm font-semibold text-slate-700">Why this project is flagged &ndash; key drivers</h2>
-        <p class="text-xs text-slate-400 mt-0.5 mb-3">
+        <h2 class="text-sm font-semibold text-slate-700" data-i18n="detail.keyDriversTitle">Why this project is flagged &ndash; key drivers</h2>
+        <p class="text-xs text-slate-400 mt-0.5 mb-3" data-i18n="detail.keyDriversNote">
           Plain-language reasons drawn from the project's own data (docs/architecture.md &sect;4),
           most significant first. Each is paired with a suggested action.
         </p>
@@ -96,28 +97,29 @@
 
       <!-- ===== Four-pillar breakdown ===== -->
       <section>
-        <h2 class="text-sm font-semibold text-slate-700 mb-2">Four-pillar breakdown</h2>
+        <h2 class="text-sm font-semibold text-slate-700 mb-2" data-i18n="detail.pillarsTitle">Four-pillar breakdown</h2>
         <div class="grid gap-4 sm:grid-cols-2" id="pd-pillars"></div>
       </section>
 
       <!-- ===== Community Consultation (SIA) Log (feature 1) ===== -->
       <section class="bg-white border border-slate-200 rounded-lg p-5">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 class="text-sm font-semibold text-slate-700">Community Consultation (SIA) Log</h2>
+          <h2 class="text-sm font-semibold text-slate-700" data-i18n="detail.siaTitle">Community Consultation (SIA) Log</h2>
           <p class="text-xs text-slate-500">
-            Community sentiment score (proxy):
+            <span data-i18n="detail.siaSentimentLabel">Community sentiment score (proxy):</span>
             <span class="font-semibold text-slate-800" id="pd-sia-sentiment"></span> / 1.00
           </p>
         </div>
-        <p class="text-xs text-slate-400 mt-0.5 mb-2">
+        <p class="text-xs text-slate-400 mt-0.5 mb-2" data-i18n="detail.siaNote">
           The consultation record behind the sentiment score - shown as filed. Not a decision.
         </p>
+        <p class="text-xs text-amber-700 mt-0.5 mb-2 hidden" id="pd-sia-lang-note" data-i18n="detail.siaEnglishOnlyNote"></p>
         <div class="sia-log" id="pd-sia-text"></div>
       </section>
 
       <!-- ===== Full project record ===== -->
       <section class="bg-white border border-slate-200 rounded-lg p-5">
-        <h2 class="text-sm font-semibold text-slate-700 mb-3">Full project record</h2>
+        <h2 class="text-sm font-semibold text-slate-700 mb-3" data-i18n="detail.fullRecordTitle">Full project record</h2>
         <div id="pd-record" class="grid gap-5 sm:grid-cols-2"></div>
       </section>
 
@@ -126,6 +128,7 @@
 
   <div id="app-footer"></div>
 
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
   <script src="js/schema.js"></script>
   <script src="js/projects-data.js"></script>

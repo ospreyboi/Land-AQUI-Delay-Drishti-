@@ -37,23 +37,17 @@
      text below is a DRAFT for the team's domain reviewer to confirm. It is
      grounded in the RFCTLARR Act, 2013 process but is not final wording.
      ---------------------------------------------------------------------- */
+  // Wording comes from i18n.js (keys "rec.*") so it exists in both languages;
+  // the DRAFT / pending-prd.md caveat above still applies to both.
   var RECOMMENDATIONS = {
-    compensation_disputed:
-      "Convene a compensation review with the District Collector; re-examine the award against current circle rates and the RFCTLARR Act, 2013 solatium and multiplier provisions.",
-    stay_order:
-      "Refer the case to the Government Pleader for early vacation of the stay; hold possession until the court's direction is received.",
-    consent:
-      "Resume consent-building consultations with the affected families; record objections and reassess whether the consent threshold for this project category can be met.",
-    digitize:
-      "Coordinate with the DILRMP cell / Tehsildar to digitise and reconcile the relevant land records before the award stage.",
-    sia:
-      "Commission the Social Impact Assessment through the appointed agency before issuing further notifications, as required under the RFCTLARR Act, 2013.",
-    sentiment:
-      "Hold a public hearing / gram sabha consultation to record and address grievances, and brief the project authority on the level of local opposition.",
-    rehab:
-      "Escalate resettlement-site development with the R&R Administrator; confirm the site infrastructure and allotment plan before possession is taken.",
-    district:
-      "Place the project under the district review committee for closer monitoring, with a fortnightly progress review."
+    compensation_disputed: I18N.t("rec.compensation_disputed"),
+    stay_order: I18N.t("rec.stay_order"),
+    consent: I18N.t("rec.consent"),
+    digitize: I18N.t("rec.digitize"),
+    sia: I18N.t("rec.sia"),
+    sentiment: I18N.t("rec.sentiment"),
+    rehab: I18N.t("rec.rehab"),
+    district: I18N.t("rec.district")
   };
 
 
@@ -71,18 +65,16 @@
   var isNewProject = !shipped && !!project;
 
   if (!caseId) {
-    showMessage("No project selected",
-      "Open a project from the Project List, or from a state's popup on the Overview page.");
+    showMessage(I18N.t("detail.noneSelected.title"), I18N.t("detail.noneSelected.body"));
     return;
   }
   if (!project) {
-    showMessage("Project " + caseId + " was not found",
-      "Check the case ID, or return to the Project List to pick a project.");
+    showMessage(I18N.t("detail.notFound.title", { id: caseId }), I18N.t("detail.notFound.body"));
     return;
   }
 
   // The actual render call is at the very BOTTOM of this file, so that the
-  // lookup tables below (LABELS, GROUPS, ...) are assigned before it runs.
+  // lookup tables below (GROUPS, RECOMMENDATIONS, ...) are assigned before it runs.
 
 
   /* ==================================================================
@@ -97,32 +89,40 @@
     el("pd-message").classList.remove("hidden");
   }
 
-  function yesNo(v) { return v ? "Yes" : "No"; }
+  function yesNo(v) { return v ? I18N.t("yesNo.yes") : I18N.t("yesNo.no"); }
 
   // "Punjab_District_2" -> "District 2"  (leaves a plain name like "Bhopal" as-is)
   function shortDistrict(d) {
     if (!d) { return "—"; }
-    return d.indexOf("_") === -1 ? d : d.split("_").slice(1).join(" ");
+    if (d.indexOf("_") === -1) { return d; }
+    var parts = d.split("_");   // ["Punjab", "District", "2"]
+    return I18N.t("table.district") + " " + parts[2];
   }
 
   // Field metadata is shared with the Logs dashboard - see js/schema.js.
+  // Labels come through I18N.fieldLabel() (falls back to PROJECT_SCHEMA.labels).
   var BOOLEAN_KEYS = PROJECT_SCHEMA.booleanKeys;
-  var LABELS = PROJECT_SCHEMA.labels;
   var GROUPS = PROJECT_SCHEMA.groups;
+
+  // Fields whose stored value is one of schema.js's fixed enums - translate
+  // the DISPLAYED text only (formatValue never changes what's stored/compared).
+  var ENUM_FIELD_KEYS = Object.keys(PROJECT_SCHEMA.enums);
 
   // Format one field value for display in the "full record" section.
   function formatValue(key, value) {
     if ((value === undefined || value === null || value === "") &&
         BOOLEAN_KEYS.indexOf(key) === -1) return "—";
     if (BOOLEAN_KEYS.indexOf(key) !== -1) return yesNo(value);
+    if (ENUM_FIELD_KEYS.indexOf(key) !== -1) return I18N.tv(value);
+    if (key === "state" || key === "district") return I18N.tv(value);
     if (key === "consent_percentage") return value + "%";
     if (key === "district_historical_delay_rate") return Math.round(value * 100) + "%";
     if (key === "community_sentiment_score" ||
         key === "stakeholder_responsiveness_score" ||
         key === "risk_score") return Number(value).toFixed(2);
-    if (key === "land_area_hectares") return value + " ha";
-    if (key === "compensation_offered_per_hectare") return "₹ " + Number(value).toLocaleString("en-IN") + " / ha";
-    if (key === "delay_duration_months") return value + " months";
+    if (key === "land_area_hectares") return value + " " + I18N.t("unit.hectares");
+    if (key === "compensation_offered_per_hectare") return "₹ " + Number(value).toLocaleString("en-IN") + " / " + I18N.t("unit.hectares");
+    if (key === "delay_duration_months") return value + " " + I18N.t("unit.months");
     return String(value);
   }
 
@@ -136,28 +136,28 @@
   function computeDrivers(p) {
     var candidates = [
       { on: p.compensation_disputed,
-        text: "Compensation is disputed by the landowners",
+        text: I18N.t("driver.compensation_disputed"),
         rec: RECOMMENDATIONS.compensation_disputed },
       { on: p.stay_order_issued,
-        text: "A court stay order is currently in effect",
+        text: I18N.t("driver.stay_order"),
         rec: RECOMMENDATIONS.stay_order },
       { on: p.community_sentiment_score < 0.4,
-        text: "Local community sentiment is largely opposed to this acquisition",
+        text: I18N.t("driver.sentiment"),
         rec: RECOMMENDATIONS.sentiment },
       { on: p.consent_percentage < 60,
-        text: "Landowner consent is below the required threshold",
+        text: I18N.t("driver.consent"),
         rec: RECOMMENDATIONS.consent },
       { on: !p.rehabilitation_site_ready && p.families_to_be_resettled > 20,
-        text: "The resettlement site is not ready for the number of families affected",
+        text: I18N.t("driver.rehab"),
         rec: RECOMMENDATIONS.rehab },
       { on: p.district_historical_delay_rate > 0.5,
-        text: "This district has a history of delayed projects",
+        text: I18N.t("driver.district"),
         rec: RECOMMENDATIONS.district },
       { on: !p.land_records_digitized,
-        text: "Land records are not yet digitised",
+        text: I18N.t("driver.digitize"),
         rec: RECOMMENDATIONS.digitize },
       { on: !p.sia_conducted,
-        text: "A Social Impact Assessment has not been conducted",
+        text: I18N.t("driver.sia"),
         rec: RECOMMENDATIONS.sia }
     ];
     return candidates.filter(function (c) { return c.on; });
@@ -172,29 +172,33 @@
 
   function pillarAssessment(p) {
     return [
-      { name: "1. Acquisition process health", concerns: [
-          !p.sia_conducted && "SIA not conducted",
-          p.consent_percentage < 60 && ("Consent below threshold (" + p.consent_percentage + "%)"),
-          p.community_sentiment_score < 0.4 && ("Community sentiment low (" + p.community_sentiment_score.toFixed(2) + ")"),
-          p.compensation_disputed && "Compensation disputed",
-          !p.land_records_digitized && "Land records not digitised",
-          p.survey_settlement_pending && "Survey / settlement pending"
+      { name: I18N.t("pillar.1.title"), concerns: [
+          !p.sia_conducted && I18N.t("concern.siaNotConducted"),
+          p.consent_percentage < 60 && I18N.t("concern.consentBelow", { pct: p.consent_percentage }),
+          p.community_sentiment_score < 0.4 && I18N.t("concern.sentimentLow", { score: p.community_sentiment_score.toFixed(2) }),
+          p.compensation_disputed && I18N.t("concern.compDisputed"),
+          !p.land_records_digitized && I18N.t("concern.recordsNotDigitised"),
+          p.survey_settlement_pending && I18N.t("concern.surveyPending")
         ].filter(Boolean) },
-      { name: "2. Legal disputes", concerns: [
-          p.stay_order_issued && "Stay order in effect",
-          p.case_pending_court && "Case pending in court",
-          (p.court_case_filed && p.litigation_type && p.litigation_type !== "None") && ("Litigation: " + p.litigation_type)
+      { name: I18N.t("pillar.2.title"), concerns: [
+          p.stay_order_issued && I18N.t("concern.stayOrder"),
+          p.case_pending_court && I18N.t("concern.casePending"),
+          (p.court_case_filed && p.litigation_type && p.litigation_type !== "None") &&
+            I18N.t("concern.litigation", { type: I18N.tv(p.litigation_type) })
         ].filter(Boolean) },
-      { name: "3. Rehabilitation readiness", concerns: [
-          !p.r_and_r_plan_prepared && "R&R plan not prepared",
-          (!p.rehabilitation_site_ready && p.families_to_be_resettled > 20) && ("Site not ready for " + p.families_to_be_resettled + " families"),
-          !p.livelihood_restoration_provided && "Livelihood restoration not provided"
+      { name: I18N.t("pillar.3.title"), concerns: [
+          !p.r_and_r_plan_prepared && I18N.t("concern.rrPlanNotPrepared"),
+          (!p.rehabilitation_site_ready && p.families_to_be_resettled > 20) &&
+            I18N.t("concern.siteNotReady", { n: p.families_to_be_resettled }),
+          !p.livelihood_restoration_provided && I18N.t("concern.livelihoodNotProvided")
         ].filter(Boolean) },
-      { name: "4. Administrative efficiency", concerns: [
-          !p.awarding_officer_assigned && "No awarding officer assigned",
-          p.district_historical_delay_rate > 0.5 && ("District delay history high (" + Math.round(p.district_historical_delay_rate * 100) + "%)"),
-          p.possession_status === "Not Started" && "Possession not started",
-          p.stakeholder_responsiveness_score < 0.4 && ("Stakeholder responsiveness low (" + p.stakeholder_responsiveness_score.toFixed(2) + ")")
+      { name: I18N.t("pillar.4.title"), concerns: [
+          !p.awarding_officer_assigned && I18N.t("concern.noOfficer"),
+          p.district_historical_delay_rate > 0.5 &&
+            I18N.t("concern.districtHigh", { pct: Math.round(p.district_historical_delay_rate * 100) }),
+          p.possession_status === "Not Started" && I18N.t("concern.possessionNotStarted"),
+          p.stakeholder_responsiveness_score < 0.4 &&
+            I18N.t("concern.responsivenessLow", { score: p.stakeholder_responsiveness_score.toFixed(2) })
         ].filter(Boolean) }
     ];
   }
@@ -217,7 +221,7 @@
       var mark = (i < current) ? "✓" : String(i + 1);
       return '<li class="' + cls + '">' +
                '<span class="stage-dot">' + mark + '</span>' +
-               '<span class="stage-name">' + name + '</span>' +
+               '<span class="stage-name">' + I18N.tv(name) + '</span>' +
              '</li>';
     }).join("");
   }
@@ -231,10 +235,10 @@
   function renderPillarPopover(p) {
     var scores = computePillarScores(p);   // from js/pillar-scores.js
     var rows = [
-      ["Acquisition process health", scores.acquisition_process_health],
-      ["Legal disputes", scores.legal_disputes],
-      ["Rehabilitation readiness", scores.rehabilitation_readiness],
-      ["Administrative efficiency", scores.administrative_efficiency]
+      [I18N.t("pillar.1.name"), scores.acquisition_process_health],
+      [I18N.t("pillar.2.name"), scores.legal_disputes],
+      [I18N.t("pillar.3.name"), scores.rehabilitation_readiness],
+      [I18N.t("pillar.4.name"), scores.administrative_efficiency]
     ];
     el("pd-pillar-bars").innerHTML = rows.map(function (r) {
       var pct = Math.round(r[1] * 100);
@@ -267,12 +271,15 @@
      ================================================================== */
 
   function renderSiaLog(p) {
-    var text = (window.SIA_LOGS && window.SIA_LOGS[p.case_id]) ||
-               "No consultation log is on file for this project.";
+    var logExists = !!(window.SIA_LOGS && window.SIA_LOGS[p.case_id]);
+    var text = logExists ? window.SIA_LOGS[p.case_id] : I18N.t("detail.siaNoLog");
     // textContent (not innerHTML): show the report text exactly, no markup.
     // CSS .sia-log uses white-space: pre-wrap to keep the line breaks.
     el("pd-sia-text").textContent = text;
     el("pd-sia-sentiment").textContent = Number(p.community_sentiment_score).toFixed(2);
+    // The log text itself is only ever generated in English (see js/sia-logs.js) -
+    // say so when the page is in Hindi, rather than silently mixing languages.
+    el("pd-sia-lang-note").classList.toggle("hidden", !(logExists && I18N.isHindi()));
   }
 
 
@@ -282,25 +289,22 @@
 
   function renderDetail(p) {
     el("pd-content").classList.remove("hidden");
-    document.title = p.case_id + " · Project Detail · Land Acquisition Delay Risk Dashboard";
+    document.title = p.case_id + " · " + I18N.t("nav.detail") + " · " + I18N.t("shell.dashboardTitle");
 
     // ---- header ----
     el("pd-caseid").textContent = (p.project_name ? p.project_name + "  ·  " : "") + p.case_id;
     if (isNewProject) {
       el("pd-caseid").insertAdjacentHTML("afterend",
-        '<p class="text-xs text-amber-700 mt-0.5">Logged on the Logs dashboard (this browser). ' +
-        'The model has not assessed it yet, so there is no risk score - the points below are ' +
-        'from the entered data.</p>');
+        '<p class="text-xs text-amber-700 mt-0.5">' + I18N.t("detail.newProjectNotice") + '</p>');
     } else if (ProjectOverrides.get(p.case_id)) {
       el("pd-caseid").insertAdjacentHTML("afterend",
-        '<p class="text-xs text-amber-700 mt-0.5">Includes field edits saved on the Logs dashboard ' +
-        '(this browser). The risk score below is the last model run - the model re-runs server-side.</p>');
+        '<p class="text-xs text-amber-700 mt-0.5">' + I18N.t("detail.editedNotice") + '</p>');
     }
     el("pd-header-facts").innerHTML = [
-      ["Project type", p.project_type || "—"],
-      ["Location", (p.state || "—") + " / " + shortDistrict(p.district)],
-      ["Department", p.acquiring_authority || "—"],
-      ["Stage of process", p.stage_of_process || "—"]
+      [I18N.t("detail.projectType"), p.project_type ? I18N.tv(p.project_type) : "—"],
+      [I18N.t("detail.location"), (p.state ? I18N.tv(p.state) : "—") + " / " + shortDistrict(p.district)],
+      [I18N.t("detail.department"), p.acquiring_authority ? I18N.tv(p.acquiring_authority) : "—"],
+      [I18N.t("detail.stageOfProcess"), p.stage_of_process ? I18N.tv(p.stage_of_process) : "—"]
     ].map(function (row) {
       return '<div><p class="text-slate-500">' + row[0] + '</p>' +
              '<p class="font-medium">' + row[1] + '</p></div>';
@@ -316,17 +320,17 @@
       el("pd-risk-score").textContent = "—";
       bar.style.width = "0%";
       el("pd-risk-status").innerHTML =
-        '<span class="badge badge--normal">Awaiting model assessment</span>';
+        '<span class="badge badge--normal">' + I18N.t("detail.awaitingAssessment") + '</span>';
       el("pd-risk-duration").textContent = "";
     } else {
       el("pd-risk-score").textContent = p.risk_score.toFixed(2);
       bar.style.width = Math.round(p.risk_score * 100) + "%";
       bar.className = "h-2.5 rounded-full " + (p.delayed ? "bg-red-600" : "bg-blue-600");
       el("pd-risk-status").innerHTML = p.delayed
-        ? '<span class="badge badge--high">Flagged high-priority</span> &nbsp;for officer review'
-        : '<span class="badge badge--normal">Not currently flagged</span>';
+        ? '<span class="badge badge--high">' + I18N.t("detail.flaggedHighPriority") + '</span> &nbsp;' + I18N.t("detail.forOfficerReview")
+        : '<span class="badge badge--normal">' + I18N.t("detail.notCurrentlyFlagged") + '</span>';
       el("pd-risk-duration").textContent = p.delayed
-        ? "Model-estimated delay if it occurs: about " + Math.round(p.delay_duration_months) + " months."
+        ? I18N.t("detail.estimatedDelay", { n: Math.round(p.delay_duration_months) })
         : "";
     }
     renderPillarPopover(p);
@@ -335,21 +339,18 @@
     var drivers = computeDrivers(p);
     var driversBox = el("pd-drivers");
     if (drivers.length === 0) {
-      driversBox.innerHTML =
-        '<p class="text-sm text-slate-500">No major risk drivers were identified from the available data for this project.</p>';
+      driversBox.innerHTML = '<p class="text-sm text-slate-500">' + I18N.t("detail.noDrivers") + '</p>';
       el("pd-rec-note").textContent = "";
     } else {
       driversBox.innerHTML = drivers.map(function (d, i) {
         return '<div class="border border-slate-200 rounded-md p-3">' +
                  '<p class="text-sm font-medium text-slate-800">' + (i + 1) + '. ' + d.text + '</p>' +
                  '<p class="text-sm text-slate-600 mt-1">' +
-                   '<span class="text-slate-400">Suggested action &mdash; </span>' + d.rec +
+                   '<span class="text-slate-400">' + I18N.t("detail.suggestedAction") + ' </span>' + d.rec +
                  '</p>' +
                '</div>';
       }).join("");
-      el("pd-rec-note").textContent =
-        "Suggested actions are DRAFT wording for the reviewing officer, pending finalisation with prd.md. " +
-        "They are prompts for consideration, not automatic directives.";
+      el("pd-rec-note").textContent = I18N.t("detail.recNote");
     }
 
     // ---- community consultation (SIA) log ----
@@ -361,12 +362,12 @@
       var body = hasConcerns
         ? '<ul class="mt-2 text-sm text-slate-600 list-disc list-inside space-y-0.5">' +
             pillar.concerns.map(function (c) { return '<li>' + c + '</li>'; }).join("") + '</ul>'
-        : '<p class="mt-2 text-sm text-slate-500">Nothing in this area is flagged for this project.</p>';
+        : '<p class="mt-2 text-sm text-slate-500">' + I18N.t("detail.nothingFlagged") + '</p>';
       return '<div class="pillar-card">' +
                '<p class="font-semibold text-slate-800">' + pillar.name + '</p>' +
                '<p class="text-sm font-medium ' +
                  (hasConcerns ? "pillar-status--attention" : "pillar-status--ok") + '">' +
-                 (hasConcerns ? "Needs attention" : "No concerns flagged") + '</p>' +
+                 (hasConcerns ? I18N.t("detail.needsAttention") : I18N.t("detail.noConcerns")) + '</p>' +
                body +
              '</div>';
     }).join("");
@@ -375,12 +376,12 @@
     el("pd-record").innerHTML = GROUPS.map(function (g) {
       var rows = g.keys.map(function (k) {
         return '<div class="flex justify-between gap-4 py-1 border-b border-slate-100">' +
-                 '<dt class="text-slate-500">' + (LABELS[k] || k) + '</dt>' +
+                 '<dt class="text-slate-500">' + I18N.fieldLabel(k) + '</dt>' +
                  '<dd class="font-medium text-right">' + formatValue(k, p[k]) + '</dd>' +
                '</div>';
       }).join("");
       return '<div>' +
-               '<p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">' + g.title + '</p>' +
+               '<p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">' + I18N.groupTitle(g.title) + '</p>' +
                '<dl class="text-sm">' + rows + '</dl>' +
              '</div>';
     }).join("");
