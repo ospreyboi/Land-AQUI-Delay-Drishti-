@@ -20,7 +20,7 @@ extend and harden this beta — do not assume this is the final scope.
 
 | Layer | Technology |
 |---|---|
-| Database | SQLite |
+| Database | SQLite (for future pinecone with postgreSQL|
 | Backend API | FastAPI (Python) |
 | ML model | scikit-learn, persisted with joblib |
 | Frontend | Plain HTML + CSS (Tailwind via CDN) + vanilla JavaScript |
