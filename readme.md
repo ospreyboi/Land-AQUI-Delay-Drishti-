@@ -1,4 +1,4 @@
-# Land Acquisition Delay Risk Dashboard (SIH26017)
+# Land Acquisition Delay Risk Dashboard 
 
 **Predictive Analytics System for Early Detection of Land Acquisition Delays**
 Ministry of Rural Development · Dept. of Land Resources (DoLR)
