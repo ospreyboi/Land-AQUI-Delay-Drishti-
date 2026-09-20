@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Entry (Logs) &middot; Land Acquisition Delay Risk Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- Shared shell (masthead + nav + account menu) - filled by app.js -->
+  <div id="app-shell" data-active-tab="logs"></div>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Beta-stage notice -->
+    <div class="rounded-md bg-amber-100 border border-amber-300 px-4 py-2 text-sm text-amber-900" data-i18n-html="logs.betaBanner">
+      <strong>BETA STAGE.</strong> Entries here are saved in <strong>this browser only</strong> and are
+      not sent to a server. They are merged into the viewing dashboard so you can see the effect of
+      your inputs. In production this would write to the project database and re-run the model.
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+      <div>
+        <h1 class="text-lg font-bold text-slate-900" id="lg-heading" data-i18n="logs.heading.default">Project data entry</h1>
+        <p class="text-sm text-slate-500" data-i18n="logs.description">
+          Log a new project, or pick an existing one to update. Fields match the viewing
+          dashboard's "Full project record". The project number is assigned automatically.
+        </p>
+      </div>
+
+      <label class="block max-w-md">
+        <span class="filter-label" data-i18n="logs.project">Project</span>
+        <select id="lg-picker" class="filter-input">
+          <option value="" data-i18n="logs.selectProject">&mdash; Select a project &mdash;</option>
+        </select>
+      </label>
+
+      <p class="text-xs text-slate-400" id="lg-updated"></p>
+    </section>
+
+    <!-- editable field groups, built by logs.js -->
+    <div id="lg-form" class="space-y-4"></div>
+
+    <div class="flex flex-wrap items-center gap-3" id="lg-actions" hidden>
+      <button id="lg-save" type="button"
+              class="px-4 py-2 bg-blue-800 text-white rounded font-medium text-sm" data-i18n="logs.save">Save</button>
+      <button id="lg-reset" type="button"
+              class="px-3 py-2 border border-slate-300 rounded text-sm" data-i18n="logs.discard">Discard local edits</button>
+      <p class="text-sm text-green-700" id="lg-status"></p>
+    </div>
+
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/schema.js"></script>
+  <script src="js/projects-data.js"></script>
+  <script src="js/project-overrides.js"></script>
+  <script src="js/logs.js"></script>
+</body>
+</html>

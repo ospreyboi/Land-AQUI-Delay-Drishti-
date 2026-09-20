@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview &middot; Land Acquisition Delay Risk Dashboard</title>
+
+  <!-- Tailwind CSS via CDN. No build step, no npm - per docs/architecture.md. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Our own small stylesheet: the Government-of-India theming (tricolour strip,
+       KPI cards, badges, popup) that Tailwind utilities don't cover directly. -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- ===================== Shared shell =====================
+       app.js fills this with the tricolour strip, masthead, profile menu and
+       tab nav. data-active-tab tells it which tab to highlight. The same
+       <div> is on every page - the chrome lives in one place (app.js). -->
+  <div id="app-shell" data-active-tab="overview"></div>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+
+    <!-- ===================== Welcome / about ===================== -->
+    <section class="bg-white border border-slate-200 rounded-lg p-6">
+      <h1 class="text-xl font-bold text-slate-900" data-i18n="overview.welcome.title">Welcome</h1>
+
+      <p class="mt-2 text-sm leading-relaxed max-w-3xl" data-i18n-html="overview.welcome.p1">
+        This dashboard helps officers of the Department of Land Resources identify
+        land acquisition projects that are <strong>likely to face delay</strong> -
+        and understand <strong>why</strong> - early enough to act on them.
+      </p>
+
+      <p class="mt-2 text-sm leading-relaxed max-w-3xl" data-i18n-html="overview.welcome.p2">
+        For each project the system produces a <strong>delay-risk score</strong>
+        together with a plain-language explanation. The reasoning is grouped under
+        four areas:
+      </p>
+
+      <ul class="mt-3 grid gap-2 sm:grid-cols-2 text-sm max-w-3xl">
+        <li class="border border-slate-200 rounded-md px-3 py-2">
+          <span class="font-semibold" data-i18n="pillar.1.title">1. Acquisition process health</span>
+          <span class="block text-slate-500 text-xs" data-i18n="pillar.1.desc">SIA, landowner consent, compensation, documentation</span>
+        </li>
+        <li class="border border-slate-200 rounded-md px-3 py-2">
+          <span class="font-semibold" data-i18n="pillar.2.title">2. Legal disputes</span>
+          <span class="block text-slate-500 text-xs" data-i18n="pillar.2.desc">court cases, stay orders, litigation type</span>
+        </li>
+        <li class="border border-slate-200 rounded-md px-3 py-2">
+          <span class="font-semibold" data-i18n="pillar.3.title">3. Rehabilitation readiness</span>
+          <span class="block text-slate-500 text-xs" data-i18n="pillar.3.desc">R&amp;R plan, resettlement site status</span>
+        </li>
+        <li class="border border-slate-200 rounded-md px-3 py-2">
+          <span class="font-semibold" data-i18n="pillar.4.title">4. Administrative efficiency</span>
+          <span class="block text-slate-500 text-xs" data-i18n="pillar.4.desc">officer assignment, district historical performance</span>
+        </li>
+      </ul>
+
+      <!-- Human-in-the-loop notice. Required by docs/rules.md rule 5 - keep it. -->
+      <div class="mt-4 rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900 max-w-3xl" data-i18n-html="overview.hitl">
+        <strong>How to read this dashboard:</strong> every risk flag is
+        decision-support information for an authorised officer to review and
+        verify. It is <strong>not</strong> an automatic or final decision, and it
+        does not replace field verification or due process.
+      </div>
+    </section>
+
+    <!-- ===================== Scope selector ===================== -->
+    <section class="bg-white border border-slate-200 rounded-lg p-6">
+      <div class="flex flex-wrap items-end gap-4">
+
+        <div>
+          <span class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1" data-i18n="overview.view">View</span>
+          <div class="inline-flex rounded-md border border-slate-300 overflow-hidden"
+               role="group" aria-label="Choose national level or state level">
+            <button id="scope-national" type="button"
+                    class="scope-btn px-4 py-2 text-sm font-medium" data-i18n="overview.nationalLevel">National level</button>
+            <button id="scope-state" type="button"
+                    class="scope-btn px-4 py-2 text-sm font-medium border-l border-slate-300" data-i18n="overview.stateLevel">State level</button>
+          </div>
+        </div>
+
+        <!-- Hidden until "State level" is chosen. -->
+        <div id="state-picker-wrap" class="hidden">
+          <label for="state-picker" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1" data-i18n="overview.state">State</label>
+          <select id="state-picker"
+                  class="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white min-w-[16rem]">
+            <option value="" data-i18n="overview.selectState">&mdash; Select a state &mdash;</option>
+          </select>
+        </div>
+
+        <p id="scope-label" class="ml-auto text-sm text-slate-500">
+          <span data-i18n="overview.showing">Showing:</span> <span id="scope-label-value" class="font-semibold text-slate-800">All of India</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== KPI cards ===================== -->
+    <section class="grid gap-4 sm:grid-cols-3">
+      <article class="kpi-card">
+        <p class="kpi-label" data-i18n="kpi.total.label">Total acquisition cases</p>
+        <p id="kpi-total" class="kpi-value">&mdash;</p>
+        <p class="kpi-note" data-i18n="kpi.total.note">All projects on record for the selected view</p>
+      </article>
+
+      <article class="kpi-card kpi-card--alert">
+        <p class="kpi-label" data-i18n="kpi.highpri.label">High-priority cases</p>
+        <p id="kpi-highpri" class="kpi-value">&mdash;</p>
+        <p class="kpi-note" data-i18n="kpi.highpri.note">Flagged by the model for officer review</p>
+      </article>
+
+      <article class="kpi-card">
+        <p class="kpi-label" data-i18n="kpi.legal.label">Legal cases pending</p>
+        <p id="kpi-legal" class="kpi-value">&mdash;</p>
+        <p class="kpi-note" data-i18n="kpi.legal.note">Projects with a court case currently pending</p>
+      </article>
+    </section>
+
+    <p class="text-xs text-slate-400 max-w-3xl" data-i18n-html="overview.apiNote">
+      Figures come from a static snapshot of the synthetic dataset while the
+      backend is being built. After integration they will be served live from
+      <code class="text-slate-500">GET /analytics/overview</code>.
+    </p>
+  </main>
+
+  <!-- ===================== State detail popup ===================== -->
+  <!-- Native <dialog>: a small window that opens on this same page. -->
+  <dialog id="state-dialog" class="state-dialog">
+    <div class="p-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900" id="sd-state">State</h2>
+          <p id="sd-summary" class="text-sm text-slate-600 mt-0.5"></p>
+        </div>
+        <button id="sd-close" type="button"
+                class="text-slate-400 hover:text-slate-700 text-2xl leading-none px-1"
+                data-i18n-aria="close" aria-label="Close">&times;</button>
+      </div>
+
+      <!-- High-priority cases by department -->
+      <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500" data-i18n="overview.popup.byDept">
+        High-priority cases by department
+      </h3>
+      <table class="w-full mt-1 text-sm">
+        <thead>
+          <tr class="text-left text-slate-500">
+            <th class="font-medium py-1" data-i18n="table.department">Department</th>
+            <th class="font-medium py-1 text-right" data-i18n="table.highPriorityCases">High-priority cases</th>
+          </tr>
+        </thead>
+        <tbody id="sd-dept-body"></tbody>
+      </table>
+
+      <!-- Highest-risk individual projects -->
+      <h3 class="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <span data-i18n="overview.popup.highestRisk">Highest-risk projects</span>
+        <span id="sd-proj-count" class="font-normal normal-case text-slate-400"></span>
+      </h3>
+      <p class="text-xs text-slate-400 mt-0.5" data-i18n="overview.popup.selectRow">Select a row to open that project's detail page.</p>
+      <div class="overflow-x-auto">
+        <table class="w-full mt-1 text-sm whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-slate-500">
+              <th class="font-medium py-1 pr-2" data-i18n="table.caseId">Case ID</th>
+              <th class="font-medium py-1 pr-2" data-i18n="table.district">District</th>
+              <th class="font-medium py-1 pr-2" data-i18n="table.projectType">Project type</th>
+              <th class="font-medium py-1 pr-2" data-i18n="table.department">Department</th>
+              <th class="font-medium py-1 pr-2" data-i18n="table.priority">Priority</th>
+              <th class="font-medium py-1 text-right" data-i18n="table.riskScore">Risk score</th>
+            </tr>
+          </thead>
+          <tbody id="sd-proj-body"></tbody>
+        </table>
+      </div>
+
+      <p class="mt-4 text-xs text-slate-500 border-t border-slate-200 pt-3" data-i18n="overview.popup.footer">
+        "High priority" here means the model has flagged the project as likely to
+        be delayed, for an officer to review - it is not a confirmed delay or a
+        decision. A project's full drivers and recommended actions will appear on
+        the Project Detail tab.
+      </p>
+    </div>
+  </dialog>
+
+  <!-- Shared footer (beta + synthetic-data disclaimers) - filled by app.js -->
+  <div id="app-footer"></div>
+
+  <!-- Scripts, in load order:
+       1. i18n.js        - English/Hindi dictionary, must load before anything
+                           that calls I18N.t()
+       2. app.js         - shared shell (masthead + nav + profile) + the tab gate
+       3. sample-data.js - the static Overview data snapshot (temporary)
+       4. overview.js    - this page's own logic, which uses all of the above -->
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sample-data.js"></script>
+  <script src="js/overview.js"></script>
+</body>
+</html>

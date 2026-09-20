@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in &middot; Land Acquisition Delay Risk Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <div class="gov-tricolour"></div>
+
+  <main class="flex-1 flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-md">
+
+      <!-- masthead (compact, no nav on the sign-in page) -->
+      <div class="flex items-center gap-3 mb-5">
+        <svg class="w-11 h-11 shrink-0" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" fill="#1e3a8a" />
+          <path d="M9 31 L19 22 L27 27 L39 16" stroke="#ffffff" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+          <rect x="9" y="34" width="30" height="5" rx="1" fill="#ffffff" opacity="0.35" />
+          <circle cx="35" cy="14" r="3" fill="#ff9933" />
+        </svg>
+        <div class="leading-tight">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500">Government of India</p>
+          <p class="text-sm font-semibold text-slate-900">Ministry of Rural Development</p>
+          <p class="text-xs text-slate-600">Department of Land Resources (DoLR)</p>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h1 class="text-lg font-bold text-slate-900" data-i18n="login.title">Sign in</h1>
+        <p class="text-sm text-slate-500 mt-1" data-i18n="shell.dashboardTitle">Land Acquisition Delay Risk Dashboard</p>
+
+        <form id="login-form" class="mt-4 space-y-4">
+          <label class="block">
+            <span class="filter-label" data-i18n="login.yourName">Your name</span>
+            <input id="login-name" type="text" autocomplete="name" required
+                   class="filter-input" placeholder="e.g. A. Deshmukh" data-i18n-placeholder="login.namePlaceholder" />
+          </label>
+
+          <label class="block">
+            <span class="filter-label" data-i18n="login.role">Role</span>
+            <select id="login-role" class="filter-input">
+              <option value="viewing" data-i18n="login.role.viewing">Risk-viewing &mdash; review delay-risk predictions</option>
+              <option value="logs" data-i18n="login.role.logs">Logs &mdash; record on-ground updates &amp; human inputs (coming soon)</option>
+              <option value="admin" data-i18n="login.role.admin">Administrative &mdash; inter-departmental coordination &amp; task execution (coming soon)</option>
+            </select>
+          </label>
+
+          <p id="login-error" class="hidden text-sm text-red-700"></p>
+
+          <button type="submit"
+                  class="w-full px-4 py-2 bg-blue-800 text-white rounded font-medium text-sm" data-i18n="login.continue">
+            Continue
+          </button>
+        </form>
+      </div>
+
+      <p class="text-xs text-slate-400 mt-4" data-i18n-html="login.notice">
+        <strong>Prototype sign-in.</strong> This is a demonstration gate for the SIH beta - it is
+        not connected to a real authentication service and does not verify identity. The Logs and
+        Administrative dashboards are planned; for now every role opens the risk-viewing dashboard.
+      </p>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <!-- i18n.js + app.js give us the footer + the session/language helpers;
+       login.js runs the form. -->
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
